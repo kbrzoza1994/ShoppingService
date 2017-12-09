@@ -5,7 +5,6 @@ import Controlers.BidControler;
 import Controlers.UsersControler;
 import Databases.AuctionDataBase;
 import Helper.Blockers;
-import Helper.ConectToDatabase;
 import interfaceWithUsers.AuctionInterface;
 import interfaceWithUsers.BidInterface;
 import models.Auction;
@@ -13,24 +12,19 @@ import models.User;
 
 import java.math.BigDecimal;
 import java.security.AccessControlException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Starter {
     private Scanner scanner = new Scanner(System.in);
     private UsersControler usersControler = new UsersControler();
-    private Connection connection;
+
 
     public Starter() {
         run();
     }
 
     private void run() {
-
-        connection = createConnection();
 
         Integer end = -1;
         while (end != 0) {
@@ -42,9 +36,7 @@ public class Starter {
         }
     }
 
-    private Connection createConnection() {
-        return ConectToDatabase.getInstance("zenek","zenek","123").getConnection();
-    }
+
 
 
     private int mainMenu() {
@@ -67,7 +59,7 @@ public class Starter {
         switch (value) {
             case 1:
                 try {
-                    User user = logIntoSystem(scanner, connection);
+                    User user = logIntoSystem(scanner);
                     userActionsInLoggedPanel(user);
                 } catch (IllegalArgumentException | NullPointerException e) {
                     System.out.println("Login problems accrued");
@@ -76,7 +68,7 @@ public class Starter {
 
             case 2:
                 try {
-                    registerNewUser(scanner, connection);
+                    registerNewUser(scanner);
                 } catch (IllegalArgumentException | AccessControlException e) {
                     System.out.println(e.getMessage());
                 }
@@ -86,7 +78,7 @@ public class Starter {
     }
 
 
-    private User logIntoSystem(Scanner scanner, Connection connection) {
+    private User logIntoSystem(Scanner scanner) {
         System.out.print("Login: ");
         String login = scanner.nextLine();
         System.out.print("Password: ");
@@ -94,7 +86,7 @@ public class Starter {
 
         User user = new User(login, password);
 
-        if (usersControler.isUserPresentInDataBase(user, connection)) {
+        if (usersControler.isUserPresentInDataBase(user)) {
             System.out.println("Logged in!");
             return new User(login, password);
         } else {
@@ -104,14 +96,14 @@ public class Starter {
     }
 
 
-    private void registerNewUser(Scanner scanner, Connection connection) {
+    private void registerNewUser(Scanner scanner) {
         System.out.print("Create new login: ");
         String login = scanner.nextLine();
         System.out.print("Enter your password: ");
         String password = scanner.nextLine();
 
         User user = new User(login, password);
-        if (usersControler.addNewUser(user, connection)) {
+        if (usersControler.addNewUser(user)) {
             System.out.println("Register successful!");
         } else {
             throw new AccessControlException("Login is not available!");
@@ -142,15 +134,15 @@ public class Starter {
                     AuctionControler auctionControler = new AuctionControler();
                     AuctionInterface auctionInterface = new AuctionInterface();
                     Auction auction = auctionInterface.createAuctionToAdd(user, auctionControler, auctionInterface, auctionDataBase);
-                    auctionControler.addAuction(auctionDataBase, auction, connection);
+                    auctionControler.addAuction(auctionDataBase, auction);
                     break;
                 }
                 case 2: {
                     AuctionControler auctionControler = new AuctionControler();
                     AuctionInterface auctionInterface = new AuctionInterface();
                     try {
-                        int idAuctionToRemove = auctionInterface.searchIdOfAuctionToRemove(user, auctionDataBase, auctionControler, connection);
-                        auctionControler.removeAuction(idAuctionToRemove, connection, auctionDataBase);
+                        int idAuctionToRemove = auctionInterface.searchIdOfAuctionToRemove(user, auctionDataBase, auctionControler);
+                        auctionControler.removeAuction(idAuctionToRemove, auctionDataBase);
                     } catch (NullPointerException e) {
                         auctionControler.getMessageWhenCannotRemoveAuction();
                     }
@@ -161,14 +153,14 @@ public class Starter {
                     AuctionView auctionView = new AuctionView();
                     BidInterface bidInterface = new BidInterface();
                     BidControler bidControler = new BidControler();
-                    auctionControler.getAuctions(auctionDataBase, connection);
+                    auctionControler.getAuctions(auctionDataBase);
 
                     if (bidInterface.shouldContinueWithBid(scanner)) {
                         try {
-                            Auction auction = bidInterface.returnAuction(scanner, auctionDataBase, user, auctionControler, connection);
+                            Auction auction = bidInterface.returnAuction(scanner, auctionDataBase, user, auctionControler);
                             BigDecimal price = bidInterface.returnPrice(scanner);
                             try {
-                                boolean Sold = bidControler.bidAuction(user, auction, price, connection, auctionDataBase);
+                                boolean Sold = bidControler.bidAuction(user, auction, price, auctionDataBase);
                                 if (Sold) System.out.println(auctionView.printCongratulationMessage(auction, user));
                                 else System.out.println(auctionView.printCurrentOffer(auction));
                             } catch (IllegalStateException e) {
@@ -183,7 +175,7 @@ public class Starter {
                 case 4: {
                     AuctionControler auctionControler = new AuctionControler();
                     AuctionView auctionView = new AuctionView();
-                    ArrayList<Auction> expiredAuctions = auctionControler.getUserExpiredAuctions(user, auctionDataBase, connection);
+                    ArrayList<Auction> expiredAuctions = auctionControler.getUserExpiredAuctions(user, auctionDataBase);
                     System.out.println(auctionView.printUserExpiredAuctions(expiredAuctions));
                     break;
                 }

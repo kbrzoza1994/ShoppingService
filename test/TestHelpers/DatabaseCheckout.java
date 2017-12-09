@@ -8,17 +8,20 @@ import java.sql.Statement;
 
 public class DatabaseCheckout {
 
-    public static boolean assertAuctionAddedToDatabase(Connection connection, String title, Integer id) {
+    public static boolean assertAuctionAddedToDatabase(Connection connection, String title, String description, BigDecimal price) {
         try {
-            String checkTitle = null;
+            String checkTitle = null, descript = null;
+            BigDecimal priceToCheck = new BigDecimal(0);
             Statement statement = connection.createStatement();
             ResultSet resultSet;
-            resultSet = statement.executeQuery("SELECT * FROM auctions WHERE id = "+id);
+            resultSet = statement.executeQuery("SELECT * FROM auctions WHERE title = '" + title + "'");
             while (resultSet.next()) {
                 checkTitle = resultSet.getString("title");
+                descript = resultSet.getString("description");
+                priceToCheck = resultSet.getBigDecimal("price");
             }
 
-            if (checkTitle != null && checkTitle.equals(title))
+            if (checkTitle.equals(title) && descript.equals(description) && priceToCheck.equals(price))
                 return true;
 
         } catch (SQLException e) {

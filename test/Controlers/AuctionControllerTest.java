@@ -6,18 +6,14 @@ import Helper.ConectToDatabase;
 import TestHelpers.DatabaseCheckout;
 import models.Auction;
 import models.User;
+import Databases.UserDataBase;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 
 
 public class AuctionControllerTest {
@@ -28,14 +24,18 @@ public class AuctionControllerTest {
     private AuctionDataBase auctionDataBase;
     private User owner = new User("login", "password");
     private Connection connection;
+    private UserDataBase userDataBase;
 
     @Before
     public void setUp() {
         connection = ConectToDatabase.getInstance("testallegro", "zenek", "123").getConnection();
+        userDataBase = new UserDataBase();
+        testObject = new AuctionControler();
         auctionDataBase = new AuctionDataBase();
         try {
             Statement statement = connection.createStatement();
             statement.execute("BEGIN ");
+            userDataBase.addNewUser(owner);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -56,8 +56,8 @@ public class AuctionControllerTest {
     @Test
     public void sholudReturnTrueIfAuctionAddedToDatabase() {
         Auction auction = new Auction("some test auction", "Some test Title", new BigDecimal(41.0), owner, 14, 6);
-        testObject.addAuction(auctionDataBase, auction, connection);
-        Assert.assertTrue(DatabaseCheckout.assertAuctionAddedToDatabase(connection, "Some test Title", 1));
+        testObject.addAuction(auctionDataBase, auction);
+        Assert.assertTrue(DatabaseCheckout.assertAuctionAddedToDatabase(connection, "Some test Title", "some test auction", new BigDecimal(41.0)));
 
     }
 /*

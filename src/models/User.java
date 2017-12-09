@@ -1,5 +1,7 @@
 package models;
 
+import Helper.ConectToDatabase;
+
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -38,7 +40,8 @@ public class User implements Serializable {
         return (this.getUserName().equals(user.getUserName()) && (this.getPassword().equals(user.getPassword())));
     }
 
-    public int getUserId(Connection connection) {
+    public int getUserId() {
+        Connection connection = ConectToDatabase.getInstance("zenek","zenek","123").getConnection();
         Statement statement = null;
         try {
             statement = connection.createStatement();

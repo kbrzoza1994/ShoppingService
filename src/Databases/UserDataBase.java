@@ -1,6 +1,8 @@
-package models;
+package Databases;
 
+import Helper.ConectToDatabase;
 import Helper.FileOperations;
+import models.User;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -8,6 +10,7 @@ import java.util.ArrayList;
 public class UserDataBase {
     private ArrayList<User> listOfUsers;
     private String fileName;
+    private Connection connection = ConectToDatabase.getInstance("zenek","zenek","123").getConnection();
 
     public UserDataBase() {
         fileName = "Users.bin";
@@ -19,10 +22,10 @@ public class UserDataBase {
         listOfUsers = FileOperations.loadUserList(fileName);
     }
 
-    public boolean addNewUser(User user, Connection connection) {
+    public boolean addNewUser(User user) {
         String login = user.getUserName();
 
-        if (!isLoginAlreadyInUse(login, connection)) {
+        if (!isLoginAlreadyInUse(login)) {
             try {
                 Statement statement = connection.createStatement();
                 String salt = null;
@@ -46,7 +49,7 @@ public class UserDataBase {
         return false;
     }
 
-    public boolean isUserPresentInDataBase(User user, Connection connection) {
+    public boolean isUserPresentInDataBase(User user) {
         String login = null;
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM users WHERE login = ? AND password = crypt(?,salt)");
@@ -68,7 +71,7 @@ public class UserDataBase {
         }
     }
 
-    private boolean isLoginAlreadyInUse(String login, Connection connection) { // jezeli jest to true
+    private boolean isLoginAlreadyInUse(String login) { // jezeli jest to true
         String loginCheck = null;
         try {
             ResultSet isLoginInBase;

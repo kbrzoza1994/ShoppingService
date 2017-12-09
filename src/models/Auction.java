@@ -112,8 +112,8 @@ public class Auction implements Serializable {
 
     }
 
-    public int setActualWinnerOfAuction(User buyer, Connection connection) {
-        this.buyerId = buyer.getUserId(connection);
+    public int setActualWinnerOfAuction(User buyer) {
+        this.buyerId = buyer.getUserId();
         setBuyer(buyer);
         return this.buyerId;
     }

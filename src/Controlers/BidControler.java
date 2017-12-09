@@ -11,10 +11,10 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 
 public class BidControler {
-    public boolean bidAuction(User buyer, Auction auction, BigDecimal price, Connection connection, AuctionDataBase auctionDataBase) {
+    public boolean bidAuction(User buyer, Auction auction, BigDecimal price, AuctionDataBase auctionDataBase) {
         boolean flag = auction.bidPrice(price);
-        auction.setActualWinnerOfAuction(buyer, connection);
-        auctionDataBase.updateWinnerOfAuction(connection, auction);
+        auction.setActualWinnerOfAuction(buyer);
+        auctionDataBase.updateWinnerOfAuction(auction);
         return flag;
     }
 

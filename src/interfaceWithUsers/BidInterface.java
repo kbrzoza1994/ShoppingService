@@ -22,10 +22,10 @@ public class BidInterface {
         return decision.equals("y");
     }
 
-    public Auction returnAuction(Scanner scanner, AuctionDataBase auctionDataBase, User user, AuctionControler auctionControler, Connection connection) {
+    public Auction returnAuction(Scanner scanner, AuctionDataBase auctionDataBase, User user, AuctionControler auctionControler) {
 
         Integer id = Inputors.creatingInteger(scanner, "Type id of auction you want to bid: ");
-        return (auctionControler.checkAccessToBidAuction(auctionDataBase,id,user, connection));
+        return (auctionControler.checkAccessToBidAuction(auctionDataBase,id,user));
     }
 
     public BigDecimal returnPrice(Scanner scanner) {

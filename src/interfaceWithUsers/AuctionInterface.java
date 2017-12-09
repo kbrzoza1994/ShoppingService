@@ -37,12 +37,12 @@ public class AuctionInterface {
         return idCategory;
     }
 
-    public int searchIdOfAuctionToRemove(User user, AuctionDataBase auctionDataBase, AuctionControler auctionControler, Connection connection) {
+    public int searchIdOfAuctionToRemove(User user, AuctionDataBase auctionDataBase, AuctionControler auctionControler) {
 
         AuctionView auctionView = new AuctionView();
-        auctionView.printUserAuctions(auctionDataBase.getListOfUserAuctions(user,connection),user);
+        auctionView.printUserAuctions(auctionDataBase.getListOfUserAuctions(user),user);
         int idAuctioToRemove = Inputors.creatingInteger(scanner, "Write id of auction which you would like to delete : ");
-        return auctionControler.checkingAccesToRemoveAuction(auctionDataBase.getListOfUserAuctions(user,connection),idAuctioToRemove);
+        return auctionControler.checkingAccesToRemoveAuction(auctionDataBase.getListOfUserAuctions(user),idAuctioToRemove);
     }
 
 

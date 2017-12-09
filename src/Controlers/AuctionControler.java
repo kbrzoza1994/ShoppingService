@@ -22,23 +22,23 @@ public class AuctionControler {
 
 
 
-    public void addAuction(AuctionDataBase dataBase, Auction auction, Connection connection) {
+    public void addAuction(AuctionDataBase dataBase, Auction auction) {
 
         AuctionView auctionView = new AuctionView();
-        if (dataBase.addAuction(auction, connection))
+        if (dataBase.addAuction(auction))
             System.out.println(auctionView.showComunicatWhenAuctionAdded());
         else
             System.out.println(auctionView.showComunicatWhenAuctionNotAdded());
     }
 
-    public void getAuctions(AuctionDataBase auctionDataBase, Connection connection) {
+    public void getAuctions(AuctionDataBase auctionDataBase) {
         CategoryController categoryController = new CategoryController();
         AuctionInterface auctionInterface = new AuctionInterface();
         CategoryView categoryView = new CategoryView();
         Category category = new Category();
         categoryView.viewAllCategories(category.mainCategory, " ");
         Integer catIdToPrintAuctions = auctionInterface.choseCategoryId("Write id of category to which would you like to show auctions (Write 0 to see all) : ", categoryController.getSetOfCategoryId());
-        AuctionView.printAllAuctions(auctionDataBase.filterListToCategory(catIdToPrintAuctions, connection));
+        AuctionView.printAllAuctions(auctionDataBase.filterListToCategory(catIdToPrintAuctions));
     }
 
     public Integer choseCategoryForAddedAuctions(AuctionInterface auctionInterface) {
@@ -47,8 +47,8 @@ public class AuctionControler {
         return auctionInterface.choseCategoryId("Chose id of category to which you would like to add auction: ", categoryController.getSetOfCategoriesAvailableToAdd());
     }
 
-    public void removeAuction(int idAuctionToRemove, Connection connection,AuctionDataBase auctionDataBase) {
-           auctionDataBase.removeAuction(connection,idAuctionToRemove);
+    public void removeAuction(int idAuctionToRemove,AuctionDataBase auctionDataBase) {
+           auctionDataBase.removeAuction(idAuctionToRemove);
     }
 
     public int checkingAccesToRemoveAuction(ArrayList<Auction> listOfValidAuctionsToRemove, int auctionId) {
@@ -61,13 +61,13 @@ public class AuctionControler {
         throw new NullPointerException("There is no such auction to remove! ");
     }
 
-    public Auction checkAccessToBidAuction(AuctionDataBase auctionDataBase, Integer auctionId, User user, Connection connection) {
-        for (Auction auction : auctionDataBase.getListOfAllAuctions(connection)) {
+    public Auction checkAccessToBidAuction(AuctionDataBase auctionDataBase, Integer auctionId, User user) {
+        for (Auction auction : auctionDataBase.getListOfAllAuctions()) {
             if (auction.getAuctionIndex().equals(auctionId)
-                    && (auction.getOwnerid() != user.getUserId(connection))
+                    && (auction.getOwnerid() != user.getUserId())
                     && (auction.isActive())
                     && ((auction.getBuyerId() == null)
-                    || (auction.getBuyerId() != user.getUserId(connection))))
+                    || (auction.getBuyerId() != user.getUserId())))
                 return auction;
 
         }
@@ -79,9 +79,9 @@ public class AuctionControler {
         System.out.println(auctionView.showComunicatWhenAuctionNotRemoved());
     }
 
-    public ArrayList<Auction> getUserExpiredAuctions(User user, AuctionDataBase auctionDataBase, Connection connection) {
-        ArrayList<Auction> expiredAuctions = new ArrayList<>(auctionDataBase.getListOfAllAuctions(connection).stream()
-                .filter(auction -> (auction.getOwnerid()== user.getUserId(connection))
+    public ArrayList<Auction> getUserExpiredAuctions(User user, AuctionDataBase auctionDataBase) {
+        ArrayList<Auction> expiredAuctions = new ArrayList<>(auctionDataBase.getListOfAllAuctions().stream()
+                .filter(auction -> (auction.getOwnerid()== user.getUserId())
                         && (!auction.isActive()))
                 .collect(Collectors.toCollection(ArrayList::new)));
 

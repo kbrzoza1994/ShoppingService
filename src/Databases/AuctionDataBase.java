@@ -1,5 +1,6 @@
 package Databases;
 
+import Helper.ConectToDatabase;
 import Helper.FileOperations;
 
 import models.Auction;
@@ -18,11 +19,7 @@ public class AuctionDataBase implements Serializable {
 
     private int indexAuction = 1;
     private ArrayList<Auction> listOfAllAuctions;
-
-    // NA CHWILE
-    public ArrayList<Auction> getListOfAllAuctions() {
-        return listOfAllAuctions;
-    }
+    private Connection connection = ConectToDatabase.getInstance("zenek","zenek","123").getConnection();
 
     public int getIndexAuction() {
         if (!listOfAllAuctions.isEmpty())
@@ -36,14 +33,14 @@ public class AuctionDataBase implements Serializable {
     }
 
 
-    public boolean addAuction(Auction auction, Connection connection) {
+    public boolean addAuction(Auction auction) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO auctions(categoryid,title,description,price,ownerid,isactive,bidcounter) VALUES (?,?,?,?,?,true,0)");
             preparedStatement.setInt(1, auction.getCategoryId());
             preparedStatement.setString(2, auction.getTitle());
             preparedStatement.setString(3, auction.getDescription());
             preparedStatement.setBigDecimal(4, auction.getPrice());
-            preparedStatement.setInt(5, auction.getUser().getUserId(connection));
+            preparedStatement.setInt(5, auction.getUser().getUserId());
             preparedStatement.executeUpdate();
             return true;
 
@@ -54,7 +51,7 @@ public class AuctionDataBase implements Serializable {
     }
 
 
-    public boolean removeAuction(Connection connection, int idAuctionToRemove) {
+    public boolean removeAuction(int idAuctionToRemove) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(" UPDATE auctions SET isactive = false WHERE id = ? ");
             preparedStatement.setInt(1, idAuctionToRemove);
@@ -66,15 +63,15 @@ public class AuctionDataBase implements Serializable {
     }
 
 
-    public ArrayList<Auction> filterListToCategory(Integer categoryId, Connection connection) {
+    public ArrayList<Auction> filterListToCategory(Integer categoryId) {
         Category category = new Category();
         ArrayList<Integer> ids = category.getSubCategoriesIds(categoryId);
-        return getListOfAllAuctions(connection).stream()
+        return getListOfAllAuctions().stream()
                 .filter(a -> ids.contains(a.getCategoryId()))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public ArrayList<Auction> getListOfAllAuctions(Connection connection) {
+    public ArrayList<Auction> getListOfAllAuctions() {
         ArrayList<Auction> allAuctions = new ArrayList<>();
 
         try {
@@ -99,13 +96,13 @@ public class AuctionDataBase implements Serializable {
         return allAuctions;
     }
 
-    public ArrayList<Auction> getListOfUserAuctions(User user, Connection connection) {
+    public ArrayList<Auction> getListOfUserAuctions(User user) {
         ArrayList<Auction> listOfUsersAuctions = new ArrayList<>();
         try {
 
             ResultSet rs;
             PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM auctions WHERE ownerid = ?");
-            preparedStatement.setInt(1, user.getUserId(connection));
+            preparedStatement.setInt(1, user.getUserId());
             rs = preparedStatement.executeQuery();
             while (rs.next()) {
                 String description = rs.getString("description");
@@ -122,7 +119,7 @@ public class AuctionDataBase implements Serializable {
         return listOfUsersAuctions;
     }
 
-    public void updateWinnerOfAuction(Connection connection, Auction auction) {
+    public void updateWinnerOfAuction(Auction auction) {
         try {
             PreparedStatement preparedStatement = connection.prepareStatement("UPDATE auctions SET buyerid = ?,price =?,bidcounter =?,isactive =? WHERE id = ? ");
             preparedStatement.setInt(1, auction.getBuyerId());
